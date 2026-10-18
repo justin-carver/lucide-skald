@@ -8,6 +8,12 @@ import "core:path/filepath"
 import "core:strings"
 import "core:terminal/ansi"
 
+import "parser"
+
+// NOTE: Changing this would introduced a Breaking Change into the Release,
+// as this is the exposed library name.
+OUTPUT_FILENAME :: "lucide"
+
 RESET :: ansi.CSI + ansi.RESET + ansi.SGR
 BOLD :: ansi.CSI + ansi.BOLD + ansi.SGR
 DIM :: ansi.CSI + ansi.FAINT + ansi.SGR
@@ -96,9 +102,17 @@ icon_enum_generation :: proc(args: Args) {
 	transmuted_data := transmute([]u8)strings.to_string(sb)
 
 	if args.test {
-		print_test_banner("lucide-skald.odin", string(transmuted_data))
+		print_test_banner(OUTPUT_FILENAME + ".odin", string(transmuted_data))
+
+		status, message, payload := parser.read_json("./temp/user.json")
+		defer delete(payload)
+
+		log.info("JSON Payload:", payload)
 	} else {
-		write_err := os.write_entire_file("lucide.odin", transmuted_data)
+		write_err := os.write_entire_file(
+			args.test ? OUTPUT_FILENAME + ".odin" : OUTPUT_FILENAME + "-test.odin",
+			transmuted_data,
+		)
 		fmt.printf("Could not read directory: %s", args.path)
 	}
 }

@@ -1,4 +1,7 @@
-# Compiled binaries and executables
+#Temporary add, until I get this working properly
+lucide.odin
+
+#Compiled binaries and executables
 *.bin
 *.exe
 *.a
