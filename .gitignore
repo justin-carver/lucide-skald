@@ -1,0 +1,34 @@
+# Compiled binaries and executables
+*.bin
+*.exe
+*.a
+*.o
+odin
+*.so
+*.dll
+*.dylib
+
+# Build directories and outputs
+bin/
+obj/
+build/
+builds/
+Debug/
+Release/
+*.pdb
+*.ilk
+
+# Testing and temporary files
+test_helper.odin
+tmp.*
+*.log
+.cache/
+temp/
+
+# Editor and IDE configurations
+.vscode/
+.vs/
+*.user
+*.suo
+.DS_Store
+ols.json

@@ -1,0 +1,23 @@
+name: Build Lucide-Skald
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Odin Compiler
+        uses: laytan/setup-odin@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # Required to pull from GitHub releases
+
+      - name: Build Project
+        run: odin build . -out:my_project
