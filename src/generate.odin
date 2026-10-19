@@ -8,7 +8,7 @@ import "core:path/filepath"
 import "core:strings"
 import "core:terminal/ansi"
 
-import "parser"
+import "../parser"
 
 // NOTE: Changing this would introduced a Breaking Change into the Release,
 // as this is the exposed library name.
