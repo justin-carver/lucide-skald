@@ -27,10 +27,10 @@ if [ "$ACTION" = "test" ]; then
   exit 0
 else
   # Generate all icon enums properly from the lucide-icons directory
-  odin run generate.odin -file
+  odin run src/generate.odin -file
 
   # Main app now has access to Lucide_Icons :: enum { ... }
-  odin build .
+  odin build src/
 
   exit 1
 fi
