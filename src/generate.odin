@@ -87,34 +87,65 @@ icon_enum_generation :: proc(args: Args) {
 	strings.builder_init(&sb)
 	defer strings.builder_destroy(&sb)
 
-	strings.write_string(&sb, "package main\n\nLucide_Icons :: enum {\n")
+	// FIXME: This should go into a template or injector later.
+	strings.write_string(
+		&sb,
+		```
+  package main
+ 
+  import "core:fmt"
+
+  Lucide_Icons :: enum {
+
+  ```,
+	)
+
+	Inline_Parse :: struct {
+		file_obj: os.File_Info,
+		base:     string,
+		ext:      string,
+	}
+
+	// May be useful for later, but we'll split up the .json and .svg files
+	// for better future parsing.
+	json_exts: [dynamic]Inline_Parse
+	svg_exts: [dynamic]Inline_Parse
+	defer delete(json_exts)
+	defer delete(svg_exts)
 
 	for info in infos {
 		if !os.is_dir(info.fullpath) {
 			base := filepath.stem(info.name)
-			clean_name := strings.to_ada_case(base, context.temp_allocator) // Example sanitization
-			fmt.sbprintfln(&sb, "\t%s,", clean_name)
+			ext := filepath.ext(info.name)
+
+			// Just gonne grab the whole object right now, and divvy things up
+			// so we're not having to split logic later on down the line.
+			//
+			// `file_obj` is mainly captured for future processing
+			append(
+				ext == ".svg" ? &svg_exts : &json_exts,
+				Inline_Parse{file_obj = info, base = base, ext = ext},
+			)
 		}
 	}
 
+	// We only want to create enums for files that are SVGs, because those
+	// are the icons that we'll be referencing in our UI's.
+	for svg, i in svg_exts {
+		// json_exts[i] -> Accompanied JSON file (lucide's category and tag information)
+		// ^ (assuming that lucide included a proper JSON file for each icon)
+		//
+		// Could also do either comparison lookup, or something else
+		clean_name := strings.to_ada_case(svg.base, context.temp_allocator) // Example sanitization
+		fmt.sbprintfln(&sb, "\t%s,", clean_name)
+		log.debug("Parsed enum: ", clean_name)
+	}
 	strings.write_string(&sb, "}\n")
 
 	transmuted_data := transmute([]u8)strings.to_string(sb)
 
-	if args.test {
-		print_test_banner(OUTPUT_FILENAME + ".odin", string(transmuted_data))
-
-		status, message, payload := parser.read_json("./temp/user.json")
-		defer delete(payload)
-
-		log.info("JSON Payload:", payload)
-	} else {
-		write_err := os.write_entire_file(
-			args.test ? OUTPUT_FILENAME + ".odin" : OUTPUT_FILENAME + "-test.odin",
-			transmuted_data,
-		)
-		fmt.printf("Could not read directory: %s", args.path)
-	}
+	write_err := os.write_entire_file(OUTPUT_FILENAME + ".odin", transmuted_data)
+	fmt.printf("Could not read directory: %s", args.path)
 }
 
 main :: proc() {
