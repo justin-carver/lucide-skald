@@ -20,4 +20,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }} # Required to pull from GitHub releases
 
       - name: Build Project
-        run: odin build . -out:my_project
+        run: odin build src/ -out:generate

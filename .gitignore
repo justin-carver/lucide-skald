@@ -1,5 +1,6 @@
 #Temporary add, until I get this working properly
 lucide.odin
+generate
 
 #Compiled binaries and executables
 *.bin
