@@ -161,7 +161,13 @@ read_svg :: proc(path: string) -> (status: bool, message: string, payload: ^xml.
 	return true, "", xml_data
 }
 
-parse_svg :: proc(doc: ^xml.Document, allocator := context.allocator) -> (svg: Svg, err: Svg_Error) {
+parse_svg :: proc(
+	doc: ^xml.Document,
+	allocator := context.allocator,
+) -> (
+	svg: Svg,
+	err: Svg_Error,
+) {
 	context.allocator = allocator
 
 	if doc == nil || doc.element_count == 0 do return svg, .Invalid_XML
@@ -200,7 +206,14 @@ parse_svg :: proc(doc: ^xml.Document, allocator := context.allocator) -> (svg: S
 }
 
 @(private)
-walk_children :: proc(doc: ^xml.Document, id: xml.Element_ID, style: Style, svg: ^Svg) -> (err: Svg_Error) {
+walk_children :: proc(
+	doc: ^xml.Document,
+	id: xml.Element_ID,
+	style: Style,
+	svg: ^Svg,
+) -> (
+	err: Svg_Error,
+) {
 	for value in doc.elements[id].value {
 		child_id, is_element := value.(xml.Element_ID)
 		if !is_element do continue
@@ -316,23 +329,34 @@ apply_style :: proc(style: ^Style, attribs: xml.Attributes) -> (err: Svg_Error) 
 			if style.miter_limit < 1 do return .Invalid_Attribute
 		case "stroke-linecap":
 			switch a.val {
-			case "butt":   style.line_cap = .Butt
-			case "round":  style.line_cap = .Round
-			case "square": style.line_cap = .Square
-			case:          return .Invalid_Attribute
+			case "butt":
+				style.line_cap = .Butt
+			case "round":
+				style.line_cap = .Round
+			case "square":
+				style.line_cap = .Square
+			case:
+				return .Invalid_Attribute
 			}
 		case "stroke-linejoin":
 			switch a.val {
-			case "miter": style.line_join = .Miter
-			case "round": style.line_join = .Round
-			case "bevel": style.line_join = .Bevel
-			case:         return .Unsupported_Feature // miter-clip, arcs
+			case "miter":
+				style.line_join = .Miter
+			case "round":
+				style.line_join = .Round
+			case "bevel":
+				style.line_join = .Bevel
+			case:
+				return .Unsupported_Feature // miter-clip, arcs
 			}
 		case "fill-rule":
 			switch a.val {
-			case "nonzero": style.fill_rule = .Non_Zero
-			case "evenodd": style.fill_rule = .Even_Odd
-			case:           return .Invalid_Attribute
+			case "nonzero":
+				style.fill_rule = .Non_Zero
+			case "evenodd":
+				style.fill_rule = .Even_Odd
+			case:
+				return .Invalid_Attribute
 			}
 		}
 	}
@@ -343,8 +367,10 @@ apply_style :: proc(style: ^Style, attribs: xml.Attributes) -> (err: Svg_Error) 
 parse_paint :: proc(s: string) -> (paint: Paint, err: Svg_Error) {
 	value := strings.trim_space(s)
 	switch {
-	case strings.equal_fold(value, "none"):         return .None, .None
-	case strings.equal_fold(value, "currentColor"): return .Current_Color, .None
+	case strings.equal_fold(value, "none"):
+		return .None, .None
+	case strings.equal_fold(value, "currentColor"):
+		return .Current_Color, .None
 	}
 	log.warnf("svg: unsupported paint %q", s)
 	return .None, .Unsupported_Feature

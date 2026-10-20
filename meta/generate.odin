@@ -1,4 +1,4 @@
-package main
+package meta
 
 import "core:flags"
 import "core:fmt"
@@ -7,8 +7,6 @@ import "core:os"
 import "core:path/filepath"
 import "core:strings"
 import "core:terminal/ansi"
-
-import "../parser"
 
 // NOTE: Changing this would introduced a Breaking Change into the Release,
 // as this is the exposed library name.
@@ -87,19 +85,6 @@ icon_enum_generation :: proc(args: Args) {
 	strings.builder_init(&sb)
 	defer strings.builder_destroy(&sb)
 
-	// FIXME: This should go into a template or injector later.
-	strings.write_string(
-		&sb,
-		```
-  package main
- 
-  import "core:fmt"
-
-  Lucide_Icons :: enum {
-
-  ```,
-	)
-
 	Inline_Parse :: struct {
 		file_obj: os.File_Info,
 		base:     string,
@@ -148,6 +133,7 @@ icon_enum_generation :: proc(args: Args) {
 	fmt.printf("Could not read directory: %s", args.path)
 }
 
+
 main :: proc() {
 	args: Args
 	flags.parse_or_exit(&args, os.args)
@@ -156,6 +142,10 @@ main :: proc() {
 		opt = log.Default_Console_Logger_Opts - {.Terminal_Color} + {.Date} - {.Procedure},
 	)
 	defer log.destroy_console_logger(context.logger)
+
+	m := meta_init()
+
+	fmt.printfln("%s", m.literal)
 
 	// TODO: Need to add some pre-flight checks... at some point...
 	icon_enum_generation(args)
